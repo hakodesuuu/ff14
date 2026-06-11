@@ -126,6 +126,7 @@ const state = {
     totalClears: 0,
     showPath: true,
     clickTarget: null,
+    allowFailReset: false,
     
     // 定时任务
     timer: null,
@@ -664,6 +665,7 @@ function resetSimulator() {
     state.phase = 'idle';
     state.isPlaying = false;
     state.clickTarget = null;
+    state.allowFailReset = false;
     hideClickTargetRipple();
     
     document.getElementById('portalsGroup').innerHTML = '';
@@ -976,6 +978,7 @@ function triggerFailure(reason, isFallOff = false, forceYouDied = false, failedW
     state.phase = 'failed';
     state.isPlaying = false;
     state.streak = 0; 
+    state.allowFailReset = false; // 初始禁止重置，防止快速连续点击误触跳过
     
     sound.playFail();
     updateUIControls();
@@ -1023,6 +1026,12 @@ function triggerFailure(reason, isFallOff = false, forceYouDied = false, failedW
             highlightCorrectSolution(targetWave);
         }
         renderOverlayLayers();
+
+        // 结算面板出现 500ms (0.5s) 后，才允许点击空白处返回，防止玩家因手速快直接点掉
+        const resetId = setTimeout(() => {
+            state.allowFailReset = true;
+        }, 500);
+        state.timeouts.push(resetId);
     }, 450);
     state.timeouts.push(id);
 }
@@ -1170,9 +1179,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 结算状态时（例如失败状态），点击其他页面空白区域直接返回初始状态
+    // 结算状态时（例如失败状态），点击其他页面空白区域返回初始状态（需在结算横幅出现后 0.5s 才允许，防止误触）
     document.addEventListener('click', (e) => {
         if (state.phase === 'failed') {
+            if (!state.allowFailReset) return;
             const isBtnStart = e.target.closest('#btnStart');
             const isBtnReset = e.target.closest('#btnReset');
             const isBtnMode = e.target.closest('#btnClickMode') || e.target.closest('#btnWasdMode') || e.target.closest('#speedSelect');

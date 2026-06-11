@@ -866,4 +866,15 @@ input:checked + .slider:before {
     100% { transform: scale(2.8); opacity: 0; }
 }
 
+/* 移动端性能优化：在屏幕宽度 <= 768px 时禁用 CPU/GPU 负担过重的 SVG 滤镜，彻底消除第一回合判定时的界面闪动/掉帧 */
+@media (max-width: 768px) {
+    .laser-active-bg, 
+    .boss-cleave, 
+    .boss-cleave-failed, 
+    .laser-failed-hazard,
+    .laser-line-preview {
+        filter: none !important;
+    }
+}
+
 

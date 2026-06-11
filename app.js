@@ -1148,14 +1148,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const speedSelect = document.getElementById('speedSelect');
     state.gameMode = speedSelect.value;
-    state.speed = (state.gameMode === 'challenge') ? 1.2 : 1.0;
+    state.speed = (state.gameMode === 'ultimate') ? 1.5 : ((state.gameMode === 'challenge') ? 1.2 : 1.0);
 
     speedSelect.addEventListener('change', (e) => {
         if (state.phase !== 'idle') {
             state.streak = 0;
         }
         state.gameMode = e.target.value;
-        state.speed = (state.gameMode === 'challenge') ? 1.2 : 1.0;
+        state.speed = (state.gameMode === 'ultimate') ? 1.5 : ((state.gameMode === 'challenge') ? 1.2 : 1.0);
         resetSimulator();
     });
 

@@ -127,6 +127,8 @@ const state = {
     showPath: true,
     clickTarget: null,
     allowFailReset: false,
+    ultimateStreak: 0,
+    maxUltimateStreak: 0,
     
     // 定时任务
     timer: null,
@@ -703,11 +705,17 @@ function updateUIControls() {
     document.getElementById('streakVal').textContent = state.streak;
     document.getElementById('maxStreakVal').textContent = state.maxStreak;
     document.getElementById('totalClearsVal').textContent = state.totalClears;
+
+    const ultStreakEl = document.getElementById('ultimateStreakVal');
+    const maxUltStreakEl = document.getElementById('maxUltimateStreakVal');
+    if (ultStreakEl) ultStreakEl.textContent = state.ultimateStreak;
+    if (maxUltStreakEl) maxUltStreakEl.textContent = state.maxUltimateStreak;
 }
 
 function startNewRound() {
     if (state.isPlaying) {
         state.streak = 0;
+        state.ultimateStreak = 0; // 正在游戏中直接点击开始，也属于中途放弃，重置绝境连胜
     }
     resetSimulator();
     
@@ -888,7 +896,8 @@ function startSimulationLoop() {
 function setMode(newMode) {
     if (state.mode === newMode) return;
     
-    // 只有在初始状态（phase === 'idle'）下切换模式才不会断掉连击；在回合进行中等其他状态切换模式，均重置连击为 0
+    // 切换操作模式会直接清空绝境连胜记录，若在游戏进行中切换还会清空普通连胜
+    state.ultimateStreak = 0;
     if (state.phase !== 'idle') {
         state.streak = 0;
     }
@@ -978,6 +987,7 @@ function triggerFailure(reason, isFallOff = false, forceYouDied = false, failedW
     state.phase = 'failed';
     state.isPlaying = false;
     state.streak = 0; 
+    state.ultimateStreak = 0; // 死亡重置绝境连胜记录
     state.allowFailReset = false; // 初始禁止重置，防止快速连续点击误触跳过
     
     sound.playFail();
@@ -1092,6 +1102,14 @@ function triggerVictory() {
         if (state.streak > state.maxStreak) {
             state.maxStreak = state.streak;
         }
+
+        // 绝境难度特殊连胜记录
+        if (state.gameMode === 'ultimate') {
+            state.ultimateStreak++;
+            if (state.ultimateStreak > state.maxUltimateStreak) {
+                state.maxUltimateStreak = state.ultimateStreak;
+            }
+        }
     }
     state.totalClears++;
 
@@ -1138,6 +1156,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if(confirm('确定要清除当前的连胜和通关数据吗？')) {
             state.streak = 0;
             state.maxStreak = 0;
+            state.ultimateStreak = 0;
+            state.maxUltimateStreak = 0;
             state.totalClears = 0;
             resetSimulator();
         }
@@ -1151,10 +1171,15 @@ document.addEventListener('DOMContentLoaded', () => {
     state.speed = (state.gameMode === 'ultimate') ? 1.5 : ((state.gameMode === 'challenge') ? 1.2 : 1.0);
 
     speedSelect.addEventListener('change', (e) => {
+        const newMode = e.target.value;
+        // 中途切换或者即使在初始状态下切换成非绝境难度，都会清空绝境连胜记录
+        if (state.phase !== 'idle' || newMode !== 'ultimate') {
+            state.ultimateStreak = 0;
+        }
         if (state.phase !== 'idle') {
             state.streak = 0;
         }
-        state.gameMode = e.target.value;
+        state.gameMode = newMode;
         state.speed = (state.gameMode === 'ultimate') ? 1.5 : ((state.gameMode === 'challenge') ? 1.2 : 1.0);
         resetSimulator();
     });

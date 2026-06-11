@@ -114,6 +114,9 @@ header {
     overflow: hidden;
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
     position: relative;
+    margin: 32px 0; /* 加大上下边距，使游戏区域与顶部读条进度条、底部按钮隔开更合适距离，防止移动端前后刀导致偏移 */
+    transform: translate3d(0, 0, 0); /* 启用3D硬件加速，防止劈刀大图层动画重新渲染时引发整个页面文档流微小重排与抖动 */
+    will-change: transform;
 }
 
 #arenaSvg {

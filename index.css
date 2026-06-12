@@ -125,7 +125,6 @@ header {
     display: block;
 }
 
-/* 读条与状态指示栏样式 */
 .cast-bar-container {
     width: 100%;
     max-width: 580px;
@@ -133,7 +132,6 @@ header {
     flex-direction: column;
     gap: 6px;
     opacity: 1;
-    transition: opacity 0.3s ease;
 }
 
 .cast-title {

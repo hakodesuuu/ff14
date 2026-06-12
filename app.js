@@ -772,6 +772,10 @@ function startSimulationLoop() {
             state.phase = 'waiting';
             castBar.style.visibility = 'hidden';
             castBar.style.opacity = '0';
+            // 清空进度条及文本，防止移动端 GPU 渲染延迟重绘时发生“星轨链0.0s卡屏不消失”的视觉Bug
+            document.getElementById('castProgress').style.width = '0%';
+            document.getElementById('castTime').textContent = '';
+            document.getElementById('castTitle').textContent = '';
         } else if (t < 9.0) {
             state.phase = 'casting';
             castBar.style.visibility = 'visible';

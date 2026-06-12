@@ -690,6 +690,7 @@ function resetSimulator() {
     document.getElementById('resultBanner').classList.remove('show');
     document.getElementById('modalBackdrop').classList.remove('show');
     document.getElementById('btnModalClose').textContent = '再试一次';
+    document.getElementById('castBarContainer').style.visibility = 'visible';
     document.getElementById('castBarContainer').style.opacity = '1';
     
     clearDamageDownBuff();
@@ -761,6 +762,7 @@ function startSimulationLoop() {
         const castBar = document.getElementById('castBarContainer');
         if (t < 1.0) {
             state.phase = 'casting_star_chain';
+            castBar.style.visibility = 'visible';
             castBar.style.opacity = '1';
             const progress = (t / 1.0) * 100;
             document.getElementById('castProgress').style.width = `${progress}%`;
@@ -768,9 +770,11 @@ function startSimulationLoop() {
             document.getElementById('castTitle').textContent = '星轨链';
         } else if (t < 4.5) {
             state.phase = 'waiting';
+            castBar.style.visibility = 'hidden';
             castBar.style.opacity = '0';
         } else if (t < 9.0) {
             state.phase = 'casting';
+            castBar.style.visibility = 'visible';
             castBar.style.opacity = '1';
             const progress = ((t - 4.5) / 4.5) * 100;
             document.getElementById('castProgress').style.width = `${progress}%`;
@@ -778,31 +782,51 @@ function startSimulationLoop() {
             document.getElementById('castTitle').textContent = '兽焰连尾击';
         } else if (t < 10.5) {
             state.phase = 'active';
-            castBar.style.opacity = (state.gameMode === 'easy') ? '1' : '0';
-            const progress = ((10.5 - t) / 1.5) * 100;
-            document.getElementById('castProgress').style.width = `${progress}%`;
-            document.getElementById('castTime').textContent = `${Math.max(0, 10.5 - t).toFixed(1)}s`;
-            document.getElementById('castTitle').textContent = `第 1 回合安全！请在判定前移动到第 2 回合安全区！`;
+            if (state.gameMode === 'easy') {
+                castBar.style.visibility = 'visible';
+                castBar.style.opacity = '1';
+                const progress = ((10.5 - t) / 1.5) * 100;
+                document.getElementById('castProgress').style.width = `${progress}%`;
+                document.getElementById('castTime').textContent = `${Math.max(0, 10.5 - t).toFixed(1)}s`;
+                document.getElementById('castTitle').textContent = `第 1 回合安全！请在判定前移动到第 2 回合安全区！`;
+            } else {
+                castBar.style.visibility = 'hidden';
+            }
         } else if (t < 12.0) {
             state.phase = 'active';
-            castBar.style.opacity = (state.gameMode === 'easy') ? '1' : '0';
-            const progress = ((12.0 - t) / 1.5) * 100;
-            document.getElementById('castProgress').style.width = `${progress}%`;
-            document.getElementById('castTime').textContent = `${Math.max(0, 12.0 - t).toFixed(1)}s`;
-            document.getElementById('castTitle').textContent = `第 2 回合安全！请在判定前移动到第 3 回合安全区！`;
+            if (state.gameMode === 'easy') {
+                castBar.style.visibility = 'visible';
+                castBar.style.opacity = '1';
+                const progress = ((12.0 - t) / 1.5) * 100;
+                document.getElementById('castProgress').style.width = `${progress}%`;
+                document.getElementById('castTime').textContent = `${Math.max(0, 12.0 - t).toFixed(1)}s`;
+                document.getElementById('castTitle').textContent = `第 2 回合安全！请在判定前移动到第 3 回合安全区！`;
+            } else {
+                castBar.style.visibility = 'hidden';
+            }
         } else if (t < 13.5) {
             state.phase = 'active';
-            castBar.style.opacity = (state.gameMode === 'easy') ? '1' : '0';
-            const progress = ((13.5 - t) / 1.5) * 100;
-            document.getElementById('castProgress').style.width = `${progress}%`;
-            document.getElementById('castTime').textContent = `${Math.max(0, 13.5 - t).toFixed(1)}s`;
-            document.getElementById('castTitle').textContent = `第 3 回合安全！请在判定前移动到第 4 回合安全区！`;
+            if (state.gameMode === 'easy') {
+                castBar.style.visibility = 'visible';
+                castBar.style.opacity = '1';
+                const progress = ((13.5 - t) / 1.5) * 100;
+                document.getElementById('castProgress').style.width = `${progress}%`;
+                document.getElementById('castTime').textContent = `${Math.max(0, 13.5 - t).toFixed(1)}s`;
+                document.getElementById('castTitle').textContent = `第 3 回合安全！请在判定前移动到第 4 回合安全区！`;
+            } else {
+                castBar.style.visibility = 'hidden';
+            }
         } else {
             state.phase = 'victory_pending';
-            castBar.style.opacity = (state.gameMode === 'easy') ? '1' : '0';
-            document.getElementById('castProgress').style.width = `0%`;
-            document.getElementById('castTime').textContent = `0.0s`;
-            document.getElementById('castTitle').textContent = `第 4 回合安全！判定结束中...`;
+            if (state.gameMode === 'easy') {
+                castBar.style.visibility = 'visible';
+                castBar.style.opacity = '1';
+                document.getElementById('castProgress').style.width = `0%`;
+                document.getElementById('castTime').textContent = `0.0s`;
+                document.getElementById('castTitle').textContent = `第 4 回合安全！判定结束中...`;
+            } else {
+                castBar.style.visibility = 'hidden';
+            }
         }
         
         // 3. 事件触发器：黑洞与白线出现声音
@@ -993,9 +1017,9 @@ function triggerFailure(reason, isFallOff = false, forceYouDied = false, failedW
     sound.playFail();
     updateUIControls();
 
-    // 失败结算时隐藏读条区域，不让失败判定文本显示在进度条上
+    // 失败结算时强制隐藏读条区域（保留物理占位），不让失败判定文本显示在进度条上
     const castBar = document.getElementById('castBarContainer');
-    castBar.style.opacity = '0';
+    castBar.style.visibility = 'hidden';
 
     const targetWave = failedWaveIndex !== null ? failedWaveIndex : (state.currentWave + 1);
     
@@ -1111,7 +1135,10 @@ function triggerVictory() {
     sound.playVictory();
     updateUIControls();
 
-    // 更新上方读条区域文字和进度
+    // 更新上方读条区域文字和进度，并确保通关结算时读条容器可见
+    const castBar = document.getElementById('castBarContainer');
+    castBar.style.visibility = 'visible';
+    castBar.style.opacity = '1';
     document.getElementById('castTitle').textContent = '机制通关：恭喜通关！';
     document.getElementById('castProgress').style.width = '100%';
     document.getElementById('castTime').textContent = 'CLEARED';

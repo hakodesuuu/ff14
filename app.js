@@ -993,14 +993,9 @@ function triggerFailure(reason, isFallOff = false, forceYouDied = false, failedW
     sound.playFail();
     updateUIControls();
 
-    // 确保读条区域在失败时可见
+    // 失败结算时隐藏读条区域，不让失败判定文本显示在进度条上
     const castBar = document.getElementById('castBarContainer');
-    castBar.style.opacity = '1';
-
-    // 更新上方读条区域文字和进度
-    document.getElementById('castTitle').textContent = `判定失败：${reason}`;
-    document.getElementById('castProgress').style.width = '0%';
-    document.getElementById('castTime').textContent = '-';
+    castBar.style.opacity = '0';
 
     const targetWave = failedWaveIndex !== null ? failedWaveIndex : (state.currentWave + 1);
     
